@@ -1,20 +1,78 @@
 // ===== Firebase Realtime Sync =====
-const cardsRef = db.ref('cards');
+const STORAGE_KEY = 'kanban_cards_backup';
 let cards = [];
+let firebaseReady = false;
+let cardsRef;
 
-// Listen for real-time changes from Firebase
-cardsRef.on('value', (snapshot) => {
-    const data = snapshot.val();
-    cards = data ? Object.values(data) : [];
+try {
+    cardsRef = db.ref('cards');
+    firebaseReady = true;
+    console.log('Firebase connecté');
+
+    // Listen for real-time changes from Firebase
+    cardsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        cards = data ? Object.values(data) : [];
+        // Backup to localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+        renderBoard();
+    }, (error) => {
+        console.error('Firebase read error:', error);
+        firebaseReady = false;
+        loadFromLocalStorage();
+    });
+} catch (e) {
+    console.warn('Firebase non disponible, mode localStorage:', e);
+    firebaseReady = false;
+    loadFromLocalStorage();
+}
+
+function loadFromLocalStorage() {
+    try {
+        cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+        cards = [];
+    }
     renderBoard();
-});
+}
 
 function saveCard(card) {
-    return cardsRef.child(card.id).set(card);
+    if (firebaseReady) {
+        return cardsRef.child(card.id).set(card).catch(err => {
+            console.error('Firebase write error:', err);
+            saveLocally(card);
+        });
+    } else {
+        saveLocally(card);
+    }
+}
+
+function saveLocally(card) {
+    const idx = cards.findIndex(c => c.id === card.id);
+    if (idx !== -1) {
+        cards[idx] = card;
+    } else {
+        cards.push(card);
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+    renderBoard();
 }
 
 function deleteCardFromDB(id) {
-    return cardsRef.child(id).remove();
+    if (firebaseReady) {
+        return cardsRef.child(id).remove().catch(err => {
+            console.error('Firebase delete error:', err);
+            deleteLocally(id);
+        });
+    } else {
+        deleteLocally(id);
+    }
+}
+
+function deleteLocally(id) {
+    cards = cards.filter(c => c.id !== id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+    renderBoard();
 }
 
 function generateId() {
