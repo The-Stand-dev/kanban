@@ -11,6 +11,7 @@
 const firebaseConfig = {
     apiKey: "AIzaSyClKUtDzi4jdxu6uhbcW0W7OfHrpzgBqvY",
     authDomain: "the-stand-kanban.firebaseapp.com",
+    databaseURL: "https://the-stand-kanban-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "the-stand-kanban",
     storageBucket: "the-stand-kanban.firebasestorage.app",
     messagingSenderId: "435586834541",
