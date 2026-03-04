@@ -17,11 +17,10 @@
 
     /* Pole colors */
     --pole-dev: #58a6ff;
-    --pole-design: #d2a8ff;
+    --pole-uiux: #d2a8ff;
+    --pole-branding: #3fb950;
     --pole-marketing: #f78166;
-    --pole-management: #3fb950;
-    --pole-data: #f0c000;
-    --pole-infra: #79c0ff;
+    --pole-audiovisuel: #f0c000;
 
     /* Column dots */
     --dot-new: #8b949e;
@@ -212,11 +211,10 @@ header h1 {
 }
 
 .card-pole-bar.pole-dev { background: var(--pole-dev); }
-.card-pole-bar.pole-design { background: var(--pole-design); }
+.card-pole-bar.pole-uiux { background: var(--pole-uiux); }
+.card-pole-bar.pole-branding { background: var(--pole-branding); }
 .card-pole-bar.pole-marketing { background: var(--pole-marketing); }
-.card-pole-bar.pole-management { background: var(--pole-management); }
-.card-pole-bar.pole-data { background: var(--pole-data); }
-.card-pole-bar.pole-infra { background: var(--pole-infra); }
+.card-pole-bar.pole-audiovisuel { background: var(--pole-audiovisuel); }
 
 .card-title {
     font-size: 0.875rem;
@@ -277,11 +275,10 @@ header h1 {
 }
 
 .badge-dev { background: rgba(88, 166, 255, .15); color: var(--pole-dev); }
-.badge-design { background: rgba(210, 168, 255, .15); color: var(--pole-design); }
+.badge-uiux { background: rgba(210, 168, 255, .15); color: var(--pole-uiux); }
+.badge-branding { background: rgba(63, 185, 80, .15); color: var(--pole-branding); }
 .badge-marketing { background: rgba(247, 129, 102, .15); color: var(--pole-marketing); }
-.badge-management { background: rgba(63, 185, 80, .15); color: var(--pole-management); }
-.badge-data { background: rgba(240, 192, 0, .15); color: var(--pole-data); }
-.badge-infra { background: rgba(121, 192, 255, .15); color: var(--pole-infra); }
+.badge-audiovisuel { background: rgba(240, 192, 0, .15); color: var(--pole-audiovisuel); }
 
 /* ===== Drop placeholder ===== */
 .drop-placeholder {

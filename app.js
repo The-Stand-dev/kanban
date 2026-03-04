@@ -1,16 +1,20 @@
-// ===== Data Store =====
-const STORAGE_KEY = 'kanban_cards';
+// ===== Firebase Realtime Sync =====
+const cardsRef = db.ref('cards');
+let cards = [];
 
-function loadCards() {
-    try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch {
-        return [];
-    }
+// Listen for real-time changes from Firebase
+cardsRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    cards = data ? Object.values(data) : [];
+    renderBoard();
+});
+
+function saveCard(card) {
+    return cardsRef.child(card.id).set(card);
 }
 
-function saveCards(cards) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+function deleteCardFromDB(id) {
+    return cardsRef.child(id).remove();
 }
 
 function generateId() {
@@ -18,7 +22,6 @@ function generateId() {
 }
 
 // ===== State =====
-let cards = loadCards();
 
 // ===== DOM Elements =====
 const boardEl = document.querySelector('.board');
@@ -39,11 +42,10 @@ const modalClose = document.getElementById('modalClose');
 // ===== Pole labels =====
 const poleLabels = {
     dev: 'Dev',
-    design: 'Design',
+    uiux: 'UI-UX',
+    branding: 'Branding',
     marketing: 'Marketing',
-    management: 'Management',
-    data: 'Data',
-    infra: 'Infra'
+    audiovisuel: 'Audiovisuel'
 };
 
 // ===== Rendering =====
@@ -192,29 +194,9 @@ document.querySelectorAll('.column-cards').forEach(columnCards => {
         const newStatus = columnCards.dataset.status;
         const afterElement = getDragAfterElement(columnCards, e.clientY);
 
-        // Update status
+        // Update status and save to Firebase
         draggedCard.status = newStatus;
-
-        // Reorder: remove card, find insertion index
-        const otherCards = cards.filter(c => c.id !== draggedCard.id);
-        const columnCardsArr = otherCards.filter(c => c.status === newStatus);
-
-        let insertIndex;
-        if (afterElement) {
-            const afterCardId = afterElement.dataset.id;
-            insertIndex = otherCards.findIndex(c => c.id === afterCardId);
-        } else {
-            // Insert at end of this status group
-            const lastInColumn = [...otherCards].reverse().find(c => c.status === newStatus);
-            insertIndex = lastInColumn ? otherCards.indexOf(lastInColumn) + 1 : otherCards.length;
-        }
-
-        // Rebuild cards array with new order
-        otherCards.splice(insertIndex, 0, draggedCard);
-        cards = otherCards;
-
-        saveCards(cards);
-        renderBoard();
+        saveCard(draggedCard);
 
         removeAllDragOver();
         removePlaceholder();
@@ -297,19 +279,13 @@ cardForm.addEventListener('submit', (e) => {
         status: cardStatus.value
     };
 
-    if (id) {
-        // Update existing
-        const idx = cards.findIndex(c => c.id === id);
-        if (idx !== -1) {
-            cards[idx] = { ...cards[idx], ...cardData };
-        }
-    } else {
-        // Create new
-        cards.push({ id: generateId(), ...cardData });
-    }
+    const cardToSave = {
+        id: id || generateId(),
+        ...cardData
+    };
 
-    saveCards(cards);
-    renderBoard();
+    // Save to Firebase (real-time listener will update the board)
+    saveCard(cardToSave);
     closeModal();
 });
 
@@ -318,9 +294,7 @@ btnDelete.addEventListener('click', () => {
     if (!id) return;
 
     if (confirm('Supprimer cette carte ?')) {
-        cards = cards.filter(c => c.id !== id);
-        saveCards(cards);
-        renderBoard();
+        deleteCardFromDB(id);
         closeModal();
     }
 });
@@ -417,23 +391,7 @@ document.addEventListener('touchend', (e) => {
                 const afterElement = getDragAfterElement(columnCards, touch.clientY);
 
                 draggedCard.status = newStatus;
-
-                const otherCards = cards.filter(c => c.id !== draggedCard.id);
-                let insertIndex;
-
-                if (afterElement) {
-                    const afterCardId = afterElement.dataset.id;
-                    insertIndex = otherCards.findIndex(c => c.id === afterCardId);
-                } else {
-                    const lastInColumn = [...otherCards].reverse().find(c => c.status === newStatus);
-                    insertIndex = lastInColumn ? otherCards.indexOf(lastInColumn) + 1 : otherCards.length;
-                }
-
-                otherCards.splice(insertIndex, 0, draggedCard);
-                cards = otherCards;
-
-                saveCards(cards);
-                renderBoard();
+                saveCard(draggedCard);
             }
         }
     } else if (!touchMoved) {
@@ -452,4 +410,4 @@ document.addEventListener('touchend', (e) => {
 }, { passive: true });
 
 // ===== Init =====
-renderBoard();
+// Board is rendered automatically by Firebase real-time listener
