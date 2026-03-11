@@ -103,7 +103,8 @@ const poleLabels = {
     uiux: 'UI-UX',
     branding: 'Branding',
     marketing: 'Marketing',
-    audiovisuel: 'Audiovisuel'
+    audiovisuel: 'Audiovisuel',
+    tresoriere: 'Trésorière'
 };
 
 // ===== Rendering =====
